@@ -1,21 +1,26 @@
-import os
+import csv
 
-base_path = r"C:\Users\traba\PROG\MyModules\archive"
+def open_arq(data):
+    try:
+        with open(data, encoding='utf-8') as csvfile:
+            readCSV = csv.reader(csvfile, delimiter=',')
+            rows = list(readCSV)
+            header = rows[0]
+            data_dict = {
+                int(row[0]): dict(zip(header[1:], row[1:]))
+                for row in rows[1:]
+            }
+            return data_dict
+
+    except FileNotFoundError:
+        print(f"Erro: O arquivo '{data}' não foi encontrado.")
+    except Exception as e:
+        print(f"Ocorreu um erro ao abrir o arquivo: {e}")
+
+
+path = r"C:/Users/traba/PROG/MyModules/archive/"
 file_name = "Tweets.csv"
-
-file_path = os.path.join(base_path, file_name)
-
-if os.path.exists(file_path):
-    with open(file_path, mode="r", encoding="utf-8") as file:  # Certifique-se de usar o encoding correto
-        linha = file.readline()  # Ler o cabeçalho (primeira linha)
-        print("Linha:", linha.strip())
-
-        print("\nAlgumas linhas do arquivo:")
-        for i, line in enumerate(file):
-            print(line.strip())
-            if i >= 4:  # Limitar a leitura a 5 linhas (para não sobrecarregar o console)
-                break
-else:
-    print(f"Arquivo '{file_name}' não encontrado no diretório '{base_path}'.")
+data = path + file_name
 
 
+print(open_arq(data))
