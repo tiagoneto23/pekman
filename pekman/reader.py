@@ -1,5 +1,8 @@
 import csv
 from collections import Counter 
+import logging
+logging.basicConfig(level=logging.INFO, format="%(asctime)s; Line:%(lineno)s; %(levelname)s: %(message)s",
+                                        datefmt="%d-%b-%Y %H:%M")
 
 path = r"C:/Users/traba/PROG/MyModules/archive/"
 file_name = "Tweets.csv"
