@@ -41,12 +41,12 @@ data = read_csv()
 if not data:
     print("Não foi possível carregar os dados.")
 
-def open_arq(data):
-    rows = read_csv(data)
+def open_arq():
+    rows = read_csv()
     return {index: row for index, row in enumerate(rows, start=1)}
 
 # Analise por sentimento (Vasco)
-def cont_sent(data):
+def cont_sent():
     linhas = data
     if not linhas:
         return Counter()
@@ -57,7 +57,7 @@ def cont_sent(data):
         logging.info(f"{sentimento.capitalize()}: {quantidade}")
     return sentimentos
 
-def perc_sent(data):
+def perc_sent():
     linhas = data
     if not linhas:
         return
@@ -85,7 +85,7 @@ def perc_sent(data):
             porcentagem = (quantidade / total_tweets_companhia) * 100
             logging.info(f"  {sentimento.capitalize()}: {quantidade} tweets ({porcentagem:.2f}%)")
 
-def twt_pos(data):
+def twt_pos():
     linhas = data
     if not linhas:
         return None, 0
@@ -97,7 +97,7 @@ def twt_pos(data):
     logging.warning("Nenhuma companhia aérea com tweets positivos encontrada.")
     return None, 0
 
-def avg_rt(data):
+def avg_rt():
     linhas = data
     if not linhas:
         return {}
@@ -122,11 +122,11 @@ def avg_rt(data):
 
 # Analise por companhia (Felipe)
 
-def airlines(data):
+def airlines():
     rows = data
     return list({row['airline'] for row in rows if 'airline' in row})
 
-def twt_neg(data):
+def twt_neg():
     rows = read_csv(data)
     negtweets = Counter()
     for row in rows:
@@ -139,13 +139,13 @@ def twt_neg(data):
         logging.warning("Nenhum tweet negativo encontrado.")
     return result[0] if result else None
 
-def twt_airline(data):
+def twt_airline():
     rows = data
     contador_tweets = Counter(row['airline'] for row in rows if 'airline' in row)
     logging.info(f"Contagem de tweets por companhia: {dict(contador_tweets)}")
     return dict(contador_tweets)
 
-def airline_filter(data):
+def airline_filter():
     rows = data
     airlines = sorted({row['airline'] for row in rows if 'airline' in row})
     if not airlines:
@@ -170,7 +170,7 @@ def airline_filter(data):
 
 # Processamento Temporal (Tiago)
 
-data_dict = open_arq(data)
+"""data_dict = open_arq(data)
 
 def maxday(data_dict):
     dias = {}
@@ -271,4 +271,4 @@ def countyear(data_dict):
     except ValueError as e:
         print(e)
     except Exception as e:
-        print(f"Ocorreu um erro inesperado: {e}")
+        print(f"Ocorreu um erro inesperado: {e}")"""
