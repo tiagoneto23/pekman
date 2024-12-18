@@ -91,18 +91,25 @@ def open_arq(data):
         print(f"Ocorreu um erro ao abrir o arquivo: {e}")
 
 def airline_filter(data):
-    tweets = []
-    airline = input("Companhia aérea que deseja pesquisar: Virgin America, United, Southwest, Delta, US Airways, American")
+    rows = read_csv(data)
+    airlines = sorted({row['airline'] for row in rows if 'airline' in row})
+    if not airlines:
+        logging.warning("Nenhuma companhia aérea encontrada nos dados.")
+        return []
+
+    logging.info("Companhias disponíveis:")
+    for i, airline in enumerate(airlines, start=1):
+        print(f"{i}. {airline}")
     try:
-        with open(data, encoding='utf-8') as csvfile:
-            reader = csv.DictReader(csvfile)
-            for row in reader:
-                if row.get('airline') == airline:
-                    tweets.append(row)
-        return tweets
-    except FileNotFoundError:
-        print(f"Erro: O arquivo '{data}' não foi encontrado.")
-        return []
-    except Exception as e:
-        print(f"Ocorreu um erro ao processar o arquivo: {e}")
-        return []
+        escolha = int(input("Selecione a companhia aérea pelo número: "))
+        if 1 <= escolha <= len(airlines):
+            airline = airlines[escolha - 1]
+            tweets_filtrados = [row for row in rows if row.get('airline') == airline]
+            logging.info(f"{len(tweets_filtrados)} tweets encontrados para a companhia aérea '{airline}'.")
+            return tweets_filtrados
+        else:
+            logging.warning("Escolha inválida.")
+    except ValueError:
+        logging.warning("Entrada inválida. Por favor, insira um número.")
+    return []
+
