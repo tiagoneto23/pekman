@@ -170,7 +170,7 @@ def airline_filter():
 
 # Processamento Temporal (Tiago)
 
-"""data_dict = open_arq(data)
+data_dict = open_arq()
 
 def maxday(data_dict):
     dias = {}
@@ -271,4 +271,4 @@ def countyear(data_dict):
     except ValueError as e:
         print(e)
     except Exception as e:
-        print(f"Ocorreu um erro inesperado: {e}")"""
+        print(f"Ocorreu um erro inesperado: {e}")
