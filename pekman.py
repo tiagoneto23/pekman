@@ -1,6 +1,7 @@
 import csv
 import logging
-import osfrom collections import Counter, defaultdict
+import os
+from collections import Counter, defaultdict
 
 logging.basicConfig(level=logging.INFO,
                     format="%(asctime)s; Line:%(lineno)s; %(levelname)s: %(message)s",
