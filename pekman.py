@@ -7,14 +7,16 @@ logging.basicConfig(level=logging.INFO,
                     format="%(asctime)s; Line:%(lineno)s; %(levelname)s: %(message)s",
                     datefmt="%d-%b-%Y %H:%M")
 
-path = input("Insira o caminho do diretório: ").strip()
-ficheiro = "Tweets.csv"
-data = os.path.join(path, ficheiro)
-if os.path.exists(data):
-    print(f"Caminho completo do arquivo: {data}")
-else:
-    print(f"Erro: O arquivo '{ficheiro}' não foi encontrado no caminho '{path}'.")
+def main():
+    path = input("Insira o caminho do diretório: ").strip()
+    ficheiro = "Tweets.csv"
+    data = os.path.join(path, ficheiro)
 
+    if not os.path.exists(data):
+        print(f"Erro: O arquivo '{ficheiro}' não foi encontrado no caminho '{path}'.")
+        return
+
+    print(f"Caminho completo do arquivo: {data}")
 
 # Leitura e Armazenamento do arquivo CSV (Felipe/Tiago)
 def read_csv(data):
