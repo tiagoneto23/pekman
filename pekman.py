@@ -127,7 +127,7 @@ def airlines():
     return list({row['airline'] for row in rows if 'airline' in row})
 
 def twt_neg():
-    rows = read_csv(data)
+    rows = data
     negtweets = Counter()
     for row in rows:
         if row.get('airline_sentiment') == 'negative':
