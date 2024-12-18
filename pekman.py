@@ -7,12 +7,12 @@ logging.basicConfig(level=logging.INFO,
                     format="%(asctime)s; Line:%(lineno)s; %(levelname)s: %(message)s",
                     datefmt="%d-%b-%Y %H:%M")
 
-path = "C:/Users/fuguz/Documents/ProjetoPROG/database/"
-ficheiro = "Tweets.csv"
-data = os.path.join(path, ficheiro)
-
 # Leitura e Armazenamento do arquivo CSV 
 def read_csv(data):
+  path = input("Escreva o caminho do ficheiro Tweets.csv: ")
+    name = "Tweets.csv"
+    path_name = os.path.join(path, name)
+
     try:
         with open(data, encoding='utf-8') as csvfile:
             reader = csv.DictReader(csvfile)
