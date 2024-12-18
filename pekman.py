@@ -13,23 +13,18 @@ def read_csv():
     path = input("Escreva o caminho do ficheiro Tweets.csv: ")
     name = "Tweets.csv"
     path_name = os.path.join(path, name)
-
     try:
         lista_dicionarios = []
         with open(path_name, "r", encoding="utf-8") as file:
             content = csv.DictReader(file, delimiter=",")
-
             colunas_esperadas = {'tweet_id', 'airline_sentiment', 'airline', 'tweet_created', 'retweet_count', 'text'}
             if not colunas_esperadas.issubset(content.fieldnames):
                 print("Erro: O ficheiro não contém as colunas esperadas.")
                 return []
-
             for linha in content:
                 lista_dicionarios.append(linha)
-
         print(f"Ficheiro lido com sucesso!")
         return lista_dicionarios
-
     except FileNotFoundError:
         print(f"Erro: O ficheiro '{name}' não foi encontrado no caminho fornecido: {path_name}.")
         return []
@@ -50,7 +45,6 @@ def cont_sent():
     linhas = data
     if not linhas:
         return Counter()
-
     sentimentos = Counter(linha['airline_sentiment'] for linha in linhas)
     logging.info("Número de tweets por sentimento:")
     for sentimento, quantidade in sentimentos.items():
@@ -61,22 +55,18 @@ def perc_sent():
     linhas = data
     if not linhas:
         return
-
     contagem_por_companhia = defaultdict(Counter)
     contagem_total = Counter()
     total_tweets_geral = len(linhas)
-
     for linha in linhas:
         companhia = linha['airline']
         sentimento = linha['airline_sentiment']
         contagem_por_companhia[companhia][sentimento] += 1
         contagem_total[sentimento] += 1
-
     logging.info("\nPercentagem total de sentimentos para todas as companhias aéreas:")
     for sentimento, quantidade in contagem_total.items():
         porcentagem = (quantidade / total_tweets_geral) * 100
         logging.info(f"{sentimento.capitalize()}: {quantidade} tweets ({porcentagem:.2f}%)")
-
     logging.info("\nPercentagem de sentimentos por companhia aérea:")
     for companhia, contagem_sentimentos in contagem_por_companhia.items():
         total_tweets_companhia = sum(contagem_sentimentos.values())
@@ -151,7 +141,6 @@ def airline_filter():
     if not airlines:
         logging.warning("Nenhuma companhia aérea encontrada nos dados.")
         return []
-
     logging.info("Companhias disponíveis:")
     for i, airline in enumerate(airlines, start=1):
         print(f"{i}. {airline}")
