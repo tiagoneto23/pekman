@@ -7,7 +7,7 @@ logging.basicConfig(level=logging.INFO,
                     format="%(asctime)s; Line:%(lineno)s; %(levelname)s: %(message)s",
                     datefmt="%d-%b-%Y %H:%M")
 
-# Leitura e Armazenamento do arquivo CSV
+# Leitura e Armazenamento do arquivo CSV (Felipe)
 
 def read_csv():
     path = input("Escreva o caminho do ficheiro Tweets.csv: ")
