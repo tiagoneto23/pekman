@@ -1,4 +1,3 @@
-import os
 import csv
 import logging
 from collections import Counter, defaultdict
@@ -8,11 +7,15 @@ logging.basicConfig(level=logging.INFO,
                     format="%(asctime)s; Line:%(lineno)s; %(levelname)s: %(message)s",
                     datefmt="%d-%b-%Y %H:%M")
 
-path = input("Insira o caminho: ")
-if not path.endswith("/") and not path.endswith("\\"):
-    path += "/"
+import os
+path = input("Insira o caminho do diretório: ").strip()
 ficheiro = "Tweets.csv"
-data = path + ficheiro
+data = os.path.join(path, ficheiro)
+if os.path.exists(data):
+    print(f"Caminho completo do arquivo: {data}")
+else:
+    print(f"Erro: O arquivo '{ficheiro}' não foi encontrado no caminho '{path}'.")
+
 
 # Leitura e Armazenamento do arquivo CSV (Felipe/Tiago)
 def read_csv(data):
