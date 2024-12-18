@@ -7,8 +7,6 @@ logging.basicConfig(level=logging.INFO,
                     format="%(asctime)s; Line:%(lineno)s; %(levelname)s: %(message)s",
                     datefmt="%d-%b-%Y %H:%M")
 
-path = "C:/Users/fuguz/Documents/ProjetoPROG/database/"
-ficheiro = "Tweets.csv"
 data = path + ficheiro
 
 # Leitura e Armazenamento do arquivo CSV (Felipe/Tiago)
