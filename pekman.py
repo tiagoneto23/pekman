@@ -11,7 +11,7 @@ path = "C:/Users/fuguz/Documents/ProjetoPROG/database/"
 ficheiro = "Tweets.csv"
 data = os.path.join(path, ficheiro)
 
-# Leitura e Armazenamento do arquivo CSV (Felipe/Tiago)
+# Leitura e Armazenamento do arquivo CSV 
 def read_csv(data):
     try:
         with open(data, encoding='utf-8') as csvfile:
