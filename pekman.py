@@ -1,13 +1,11 @@
 import csv
 import logging
-from collections import Counter, defaultdict
-
+import osfrom collections import Counter, defaultdict
 
 logging.basicConfig(level=logging.INFO,
                     format="%(asctime)s; Line:%(lineno)s; %(levelname)s: %(message)s",
                     datefmt="%d-%b-%Y %H:%M")
 
-import os
 path = input("Insira o caminho do diretório: ").strip()
 ficheiro = "Tweets.csv"
 data = os.path.join(path, ficheiro)
