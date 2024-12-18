@@ -1,3 +1,4 @@
+import os
 import csv
 import logging
 from collections import Counter, defaultdict
@@ -8,6 +9,8 @@ logging.basicConfig(level=logging.INFO,
                     datefmt="%d-%b-%Y %H:%M")
 
 path = input("Insira o caminho: ")
+if not path.endswith("/") and not path.endswith("\\"):
+    path += "/"
 ficheiro = "Tweets.csv"
 data = path + ficheiro
 
