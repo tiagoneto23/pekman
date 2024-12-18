@@ -1,66 +1,72 @@
 import csv
 import logging
 from collections import Counter, defaultdict
-
+import os
 
 logging.basicConfig(level=logging.INFO,
                     format="%(asctime)s; Line:%(lineno)s; %(levelname)s: %(message)s",
                     datefmt="%d-%b-%Y %H:%M")
 
-data = path + ficheiro
+# Leitura e Armazenamento do arquivo CSV (Felipe)
 
-# Leitura e Armazenamento do arquivo CSV (Felipe/Tiago)
-def read_csv(data):
+def read_csv():
+    path = input("Escreva o caminho do ficheiro Tweets.csv: ")
+    name = "Tweets.csv"
+    path_name = os.path.join(path, name)
     try:
-        with open(data, encoding='utf-8') as csvfile:
-            reader = csv.DictReader(csvfile)
-            rows = list(reader)
-            if not rows:
-                logging.warning("O arquivo CSV está vazio.")
-            return rows
-    except csv.Error as e:
-        logging.error(f"Erro ao processar o CSV: {e}")
-        return []
+        lista_dicionarios = []
+        with open(path_name, "r", encoding="utf-8") as file:
+            content = csv.DictReader(file, delimiter=",")
+            colunas_esperadas = {'tweet_id', 'airline_sentiment', 'airline', 'tweet_created', 'retweet_count', 'text'}
+            if not colunas_esperadas.issubset(content.fieldnames):
+                print("Erro: O ficheiro não contém as colunas esperadas.")
+                return []
+            for linha in content:
+                lista_dicionarios.append(linha)
+        print(f"Ficheiro lido com sucesso!")
+        return lista_dicionarios
     except FileNotFoundError:
-        logging.error(f"Erro: O arquivo '{data}' não foi encontrado.")
+        print(f"Erro: O ficheiro '{name}' não foi encontrado no caminho fornecido: {path_name}.")
+        return []
+    except Exception as e:
+        print(f"Ocorreu um erro ao ler o ficheiro: {e}")
         return []
 
-def open_arq(data):
-    rows = read_csv(data)
+data = read_csv()
+if not data:
+    print("Não foi possível carregar os dados.")
+
+def open_arq():
+    rows = read_csv()
     return {index: row for index, row in enumerate(rows, start=1)}
 
 # Analise por sentimento (Vasco)
-def cont_sent(data):
-    linhas = read_csv(data)
+def cont_sent():
+    linhas = data
     if not linhas:
         return Counter()
-
     sentimentos = Counter(linha['airline_sentiment'] for linha in linhas)
     logging.info("Número de tweets por sentimento:")
     for sentimento, quantidade in sentimentos.items():
         logging.info(f"{sentimento.capitalize()}: {quantidade}")
     return sentimentos
 
-def perc_sent(data):
-    linhas = read_csv(data)
+def perc_sent():
+    linhas = data
     if not linhas:
         return
-
     contagem_por_companhia = defaultdict(Counter)
     contagem_total = Counter()
     total_tweets_geral = len(linhas)
-
     for linha in linhas:
         companhia = linha['airline']
         sentimento = linha['airline_sentiment']
         contagem_por_companhia[companhia][sentimento] += 1
         contagem_total[sentimento] += 1
-
     logging.info("\nPercentagem total de sentimentos para todas as companhias aéreas:")
     for sentimento, quantidade in contagem_total.items():
         porcentagem = (quantidade / total_tweets_geral) * 100
         logging.info(f"{sentimento.capitalize()}: {quantidade} tweets ({porcentagem:.2f}%)")
-
     logging.info("\nPercentagem de sentimentos por companhia aérea:")
     for companhia, contagem_sentimentos in contagem_por_companhia.items():
         total_tweets_companhia = sum(contagem_sentimentos.values())
@@ -69,8 +75,8 @@ def perc_sent(data):
             porcentagem = (quantidade / total_tweets_companhia) * 100
             logging.info(f"  {sentimento.capitalize()}: {quantidade} tweets ({porcentagem:.2f}%)")
 
-def twt_pos(data):
-    linhas = read_csv(data)
+def twt_pos():
+    linhas = data
     if not linhas:
         return None, 0
     contagem_positivos = Counter(linha['airline'] for linha in linhas if linha['airline_sentiment'] == 'positive')
@@ -81,8 +87,8 @@ def twt_pos(data):
     logging.warning("Nenhuma companhia aérea com tweets positivos encontrada.")
     return None, 0
 
-def avg_rt(data):
-    linhas = read_csv(data)
+def avg_rt():
+    linhas = data
     if not linhas:
         return {}
     soma_retweets = defaultdict(int)
@@ -106,12 +112,12 @@ def avg_rt(data):
 
 # Analise por companhia (Felipe)
 
-def airlines(data):
-    rows = read_csv(data)
+def airlines():
+    rows = data
     return list({row['airline'] for row in rows if 'airline' in row})
 
-def twt_neg(data):
-    rows = read_csv(data)
+def twt_neg():
+    rows = data
     negtweets = Counter()
     for row in rows:
         if row.get('airline_sentiment') == 'negative':
@@ -123,19 +129,18 @@ def twt_neg(data):
         logging.warning("Nenhum tweet negativo encontrado.")
     return result[0] if result else None
 
-def twt_airline(data):
-    rows = read_csv(data)
+def twt_airline():
+    rows = data
     contador_tweets = Counter(row['airline'] for row in rows if 'airline' in row)
     logging.info(f"Contagem de tweets por companhia: {dict(contador_tweets)}")
     return dict(contador_tweets)
 
-def airline_filter(data):
-    rows = read_csv(data)
+def airline_filter():
+    rows = data
     airlines = sorted({row['airline'] for row in rows if 'airline' in row})
     if not airlines:
         logging.warning("Nenhuma companhia aérea encontrada nos dados.")
         return []
-
     logging.info("Companhias disponíveis:")
     for i, airline in enumerate(airlines, start=1):
         print(f"{i}. {airline}")
@@ -154,105 +159,92 @@ def airline_filter(data):
 
 # Processamento Temporal (Tiago)
 
-data_dict = open_arq(data)
-
-def maxday(data_dict):
-    dias = {}
-    for row in data_dict.values():
-        tweet_created = row["tweet_created"]
+def maxday():
+    if not data:
+        logging.warning("Dados não estão disponíveis.")
+        return None, 0
+    dias = Counter()
+    for row in data:
+        tweet_created = row.get("tweet_created", "")
         tweet_date = tweet_created.split(" ")[0]
+        dias[tweet_date] += 1
+    if dias:
+        max_day = max(dias, key=dias.get)
+        logging.info(f"Dia com mais tweets: {max_day} ({dias[max_day]} tweets).")
+        return max_day, dias[max_day]
+    logging.warning("Não foram encontrados dados de datas.")
+    return None, 0
 
-        if tweet_date not in dias:
-            dias[tweet_date] = 1
-        else:
-            dias[tweet_date] += 1
-
-    max_day = max(dias, key=dias.get)
-    return max_day, dias[max_day]
-
-def counthour(data_dict):
-    contador_horas = {}
-    for row in data_dict.values():
-        tweet_created = row["tweet_created"]
+def counthour():
+    if not data:
+        logging.warning("Dados não estão disponíveis.")
+        return []
+    contador_horas = Counter()
+    for row in data:
+        tweet_created = row.get("tweet_created", "")
         hora = tweet_created.split(" ")[1].split(":")[0]
-
-        if hora not in contador_horas:
-            contador_horas[hora] = 1
-        else:
-            contador_horas[hora] += 1
-
+        contador_horas[hora] += 1
     horas_ordenadas = sorted(contador_horas.items(), key=lambda x: x[1], reverse=True)
+    logging.info("Contagem de tweets por hora (ordenada):")
+    for hora, quantidade in horas_ordenadas:
+        logging.info(f"{hora}h: {quantidade} tweets")
     return horas_ordenadas
 
-def count_day(data_dict):
-    dias = {}
-    for row in data_dict.values():
-        tweet_created = row["tweet_created"]
+def count_day():
+    if not data:
+        logging.warning("Dados não estão disponíveis.")
+        return []
+    dias = Counter()
+    for row in data:
+        tweet_created = row.get("tweet_created", "")
         tweet_date = tweet_created.split(" ")[0]
-
-        if tweet_date not in dias:
-            dias[tweet_date] = 1
-        else:
-            dias[tweet_date] += 1
-
-    dias_ordenados = sorted(dias.items(), key=lambda x:x[1], reverse=True)
+        dias[tweet_date] += 1
+    dias_ordenados = sorted(dias.items(), key=lambda x: x[1], reverse=True)
+    logging.info("Contagem de tweets por dia:")
+    for dia, quantidade in dias_ordenados:
+        logging.info(f"{dia}: {quantidade} tweets")
     return dias_ordenados
 
-def extrair_mes(data_dict, mes_filtro=None):
+def extrair_mes(mes_filtro=None):
+    if not data:
+        logging.warning("Dados não estão disponíveis.")
+        return {}
     if mes_filtro is None:
         mes_filtro = input('Insira um mês a filtrar (e.g., "02", "04", "11"): ').strip()
+    contador_meses = Counter()
+    for row in data:
+        tweet_created = row.get("tweet_created", "")
+        tweet_date = tweet_created.split(" ")[0]
+        mes = tweet_date.split("-")[1]
+        contador_meses[mes] += 1
+    if mes_filtro.lower() == "all":
+        logging.info(f"Contagem de tweets por todos os meses: {dict(contador_meses)}")
+        return dict(contador_meses)
+    elif mes_filtro in contador_meses:
+        logging.info(f"Total de tweets no mês {mes_filtro}: {contador_meses[mes_filtro]}")
+        return {mes_filtro: contador_meses[mes_filtro]}
+    else:
+        logging.warning(f"O mês '{mes_filtro}' não foi encontrado nos dados.")
+        return {}
 
-    try:
-        contador_meses = {}
-        for row in data_dict.values():
-            tweet_created = row["tweet_created"]
-            tweet_date = tweet_created.split(" ")[0]
-            mes = tweet_date.split("-")[1]
-
-            if mes not in contador_meses:
-                contador_meses[mes] = 1
-            else:
-                contador_meses[mes] += 1
-
-        if mes_filtro in contador_meses:
-            return f"Total de tweets no mês {mes_filtro}: {contador_meses[mes_filtro]}"
-        elif mes_filtro.lower() == "all":
-            return contador_meses
-        else:
-            raise ValueError(f"O mês '{mes_filtro}' não foi encontrado nos dados.")
-
-    except KeyError:
-        print("Erro: O campo 'tweet_created' está ausente nos dados.")
-    except ValueError as e:
-        print(e)
-    except Exception as e:
-        print(f"Ocorreu um erro inesperado: {e}")
-
-def countyear(data_dict):
-    try:
+def countyear(ano_filtro=None):
+    if not data:
+        logging.warning("Dados não estão disponíveis.")
+        return {}
+    if ano_filtro is None:
         ano_filtro = input('Insira um ano a filtrar (e.g., "2024", "2023"): ').strip()
-        contador_ano = {}
-
-        for row in data_dict.values():
-            tweet_created = row["tweet_created"]
-            tweet_date = tweet_created.split(" ")[0]
-            ano = tweet_date.split("-")[0]
-
-            if ano not in contador_ano:
-                contador_ano[ano] = 1
-            else:
-                contador_ano[ano] += 1
-
-        if ano_filtro in contador_ano:
-            return f"Total de tweets no ano '{ano_filtro}': {contador_ano[ano_filtro]}"
-        elif ano_filtro.lower() == "all":
-            return contador_ano
-        else:
-            raise ValueError(f"O ano '{ano_filtro}' não foi encontrado nos dados.")
-
-    except KeyError:
-        print("Erro: O campo 'tweet_created' está ausente nos dados.")
-    except ValueError as e:
-        print(e)
-    except Exception as e:
-        print(f"Ocorreu um erro inesperado: {e}")
+    contador_anos = Counter()
+    for row in data:
+        tweet_created = row.get("tweet_created", "")
+        tweet_date = tweet_created.split(" ")[0]
+        ano = tweet_date.split("-")[0]
+        contador_anos[ano] += 1
+    if ano_filtro.lower() == "all":
+        logging.info(f"Contagem de tweets por todos os anos: {dict(contador_anos)}")
+        return dict(contador_anos)
+    elif ano_filtro in contador_anos:
+        logging.info(f"Total de tweets no ano {ano_filtro}: {contador_anos[ano_filtro]}")
+        return {ano_filtro: contador_anos[ano_filtro]}
+    else:
+        logging.warning(f"O ano '{ano_filtro}' não foi encontrado nos dados.")
+        return {}
