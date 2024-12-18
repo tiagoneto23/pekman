@@ -7,25 +7,39 @@ logging.basicConfig(level=logging.INFO,
                     format="%(asctime)s; Line:%(lineno)s; %(levelname)s: %(message)s",
                     datefmt="%d-%b-%Y %H:%M")
 
-# Leitura e Armazenamento do arquivo CSV 
-def read_csv(data):
-  path = input("Escreva o caminho do ficheiro Tweets.csv: ")
+# Leitura e Armazenamento do arquivo CSV
+
+def read_csv():
+    path = input("Escreva o caminho do ficheiro Tweets.csv: ")
     name = "Tweets.csv"
     path_name = os.path.join(path, name)
 
     try:
-        with open(data, encoding='utf-8') as csvfile:
-            reader = csv.DictReader(csvfile)
-            rows = list(reader)
-            if not rows:
-                logging.warning("O arquivo CSV está vazio.")
-            return rows
-    except csv.Error as e:
-        logging.error(f"Erro ao processar o CSV: {e}")
-        return []
+        lista_dicionarios = []
+        with open(path_name, "r", encoding="utf-8") as file:
+            content = csv.DictReader(file, delimiter=",")
+
+            colunas_esperadas = {'tweet_id', 'airline_sentiment', 'airline', 'tweet_created', 'retweet_count', 'text'}
+            if not colunas_esperadas.issubset(content.fieldnames):
+                print("Erro: O ficheiro não contém as colunas esperadas.")
+                return []
+
+            for linha in content:
+                lista_dicionarios.append(linha)
+
+        print(f"Ficheiro lido com sucesso!")
+        return lista_dicionarios
+
     except FileNotFoundError:
-        logging.error(f"Erro: O arquivo '{data}' não foi encontrado.")
+        print(f"Erro: O ficheiro '{name}' não foi encontrado no caminho fornecido: {path_name}.")
         return []
+    except Exception as e:
+        print(f"Ocorreu um erro ao ler o ficheiro: {e}")
+        return []
+
+data = read_csv()
+if not data:
+    print("Não foi possível carregar os dados.")
 
 def open_arq(data):
     rows = read_csv(data)
@@ -33,7 +47,7 @@ def open_arq(data):
 
 # Analise por sentimento (Vasco)
 def cont_sent(data):
-    linhas = read_csv(data)
+    linhas = data
     if not linhas:
         return Counter()
 
@@ -44,7 +58,7 @@ def cont_sent(data):
     return sentimentos
 
 def perc_sent(data):
-    linhas = read_csv(data)
+    linhas = data
     if not linhas:
         return
 
@@ -72,7 +86,7 @@ def perc_sent(data):
             logging.info(f"  {sentimento.capitalize()}: {quantidade} tweets ({porcentagem:.2f}%)")
 
 def twt_pos(data):
-    linhas = read_csv(data)
+    linhas = data
     if not linhas:
         return None, 0
     contagem_positivos = Counter(linha['airline'] for linha in linhas if linha['airline_sentiment'] == 'positive')
@@ -84,7 +98,7 @@ def twt_pos(data):
     return None, 0
 
 def avg_rt(data):
-    linhas = read_csv(data)
+    linhas = data
     if not linhas:
         return {}
     soma_retweets = defaultdict(int)
@@ -109,7 +123,7 @@ def avg_rt(data):
 # Analise por companhia (Felipe)
 
 def airlines(data):
-    rows = read_csv(data)
+    rows = data
     return list({row['airline'] for row in rows if 'airline' in row})
 
 def twt_neg(data):
@@ -126,13 +140,13 @@ def twt_neg(data):
     return result[0] if result else None
 
 def twt_airline(data):
-    rows = read_csv(data)
+    rows = data
     contador_tweets = Counter(row['airline'] for row in rows if 'airline' in row)
     logging.info(f"Contagem de tweets por companhia: {dict(contador_tweets)}")
     return dict(contador_tweets)
 
 def airline_filter(data):
-    rows = read_csv(data)
+    rows = data
     airlines = sorted({row['airline'] for row in rows if 'airline' in row})
     if not airlines:
         logging.warning("Nenhuma companhia aérea encontrada nos dados.")
