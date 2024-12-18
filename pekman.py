@@ -170,105 +170,92 @@ def airline_filter():
 
 # Processamento Temporal (Tiago)
 
-data_dict = open_arq()
-
-def maxday(data_dict):
-    dias = {}
-    for row in data_dict.values():
-        tweet_created = row["tweet_created"]
+def maxday():
+    if not data:
+        logging.warning("Dados não estão disponíveis.")
+        return None, 0
+    dias = Counter()
+    for row in data:
+        tweet_created = row.get("tweet_created", "")
         tweet_date = tweet_created.split(" ")[0]
+        dias[tweet_date] += 1
+    if dias:
+        max_day = max(dias, key=dias.get)
+        logging.info(f"Dia com mais tweets: {max_day} ({dias[max_day]} tweets).")
+        return max_day, dias[max_day]
+    logging.warning("Não foram encontrados dados de datas.")
+    return None, 0
 
-        if tweet_date not in dias:
-            dias[tweet_date] = 1
-        else:
-            dias[tweet_date] += 1
-
-    max_day = max(dias, key=dias.get)
-    return max_day, dias[max_day]
-
-def counthour(data_dict):
-    contador_horas = {}
-    for row in data_dict.values():
-        tweet_created = row["tweet_created"]
+def counthour():
+    if not data:
+        logging.warning("Dados não estão disponíveis.")
+        return []
+    contador_horas = Counter()
+    for row in data:
+        tweet_created = row.get("tweet_created", "")
         hora = tweet_created.split(" ")[1].split(":")[0]
-
-        if hora not in contador_horas:
-            contador_horas[hora] = 1
-        else:
-            contador_horas[hora] += 1
-
+        contador_horas[hora] += 1
     horas_ordenadas = sorted(contador_horas.items(), key=lambda x: x[1], reverse=True)
+    logging.info("Contagem de tweets por hora (ordenada):")
+    for hora, quantidade in horas_ordenadas:
+        logging.info(f"{hora}h: {quantidade} tweets")
     return horas_ordenadas
 
-def count_day(data_dict):
-    dias = {}
-    for row in data_dict.values():
-        tweet_created = row["tweet_created"]
+def count_day():
+    if not data:
+        logging.warning("Dados não estão disponíveis.")
+        return []
+    dias = Counter()
+    for row in data:
+        tweet_created = row.get("tweet_created", "")
         tweet_date = tweet_created.split(" ")[0]
-
-        if tweet_date not in dias:
-            dias[tweet_date] = 1
-        else:
-            dias[tweet_date] += 1
-
-    dias_ordenados = sorted(dias.items(), key=lambda x:x[1], reverse=True)
+        dias[tweet_date] += 1
+    dias_ordenados = sorted(dias.items(), key=lambda x: x[1], reverse=True)
+    logging.info("Contagem de tweets por dia:")
+    for dia, quantidade in dias_ordenados:
+        logging.info(f"{dia}: {quantidade} tweets")
     return dias_ordenados
 
-def extrair_mes(data_dict, mes_filtro=None):
+def extrair_mes(mes_filtro=None):
+    if not data:
+        logging.warning("Dados não estão disponíveis.")
+        return {}
     if mes_filtro is None:
         mes_filtro = input('Insira um mês a filtrar (e.g., "02", "04", "11"): ').strip()
+    contador_meses = Counter()
+    for row in data:
+        tweet_created = row.get("tweet_created", "")
+        tweet_date = tweet_created.split(" ")[0]
+        mes = tweet_date.split("-")[1]
+        contador_meses[mes] += 1
+    if mes_filtro.lower() == "all":
+        logging.info(f"Contagem de tweets por todos os meses: {dict(contador_meses)}")
+        return dict(contador_meses)
+    elif mes_filtro in contador_meses:
+        logging.info(f"Total de tweets no mês {mes_filtro}: {contador_meses[mes_filtro]}")
+        return {mes_filtro: contador_meses[mes_filtro]}
+    else:
+        logging.warning(f"O mês '{mes_filtro}' não foi encontrado nos dados.")
+        return {}
 
-    try:
-        contador_meses = {}
-        for row in data_dict.values():
-            tweet_created = row["tweet_created"]
-            tweet_date = tweet_created.split(" ")[0]
-            mes = tweet_date.split("-")[1]
-
-            if mes not in contador_meses:
-                contador_meses[mes] = 1
-            else:
-                contador_meses[mes] += 1
-
-        if mes_filtro in contador_meses:
-            return f"Total de tweets no mês {mes_filtro}: {contador_meses[mes_filtro]}"
-        elif mes_filtro.lower() == "all":
-            return contador_meses
-        else:
-            raise ValueError(f"O mês '{mes_filtro}' não foi encontrado nos dados.")
-
-    except KeyError:
-        print("Erro: O campo 'tweet_created' está ausente nos dados.")
-    except ValueError as e:
-        print(e)
-    except Exception as e:
-        print(f"Ocorreu um erro inesperado: {e}")
-
-def countyear(data_dict):
-    try:
+def countyear(ano_filtro=None):
+    if not data:
+        logging.warning("Dados não estão disponíveis.")
+        return {}
+    if ano_filtro is None:
         ano_filtro = input('Insira um ano a filtrar (e.g., "2024", "2023"): ').strip()
-        contador_ano = {}
-
-        for row in data_dict.values():
-            tweet_created = row["tweet_created"]
-            tweet_date = tweet_created.split(" ")[0]
-            ano = tweet_date.split("-")[0]
-
-            if ano not in contador_ano:
-                contador_ano[ano] = 1
-            else:
-                contador_ano[ano] += 1
-
-        if ano_filtro in contador_ano:
-            return f"Total de tweets no ano '{ano_filtro}': {contador_ano[ano_filtro]}"
-        elif ano_filtro.lower() == "all":
-            return contador_ano
-        else:
-            raise ValueError(f"O ano '{ano_filtro}' não foi encontrado nos dados.")
-
-    except KeyError:
-        print("Erro: O campo 'tweet_created' está ausente nos dados.")
-    except ValueError as e:
-        print(e)
-    except Exception as e:
-        print(f"Ocorreu um erro inesperado: {e}")
+    contador_anos = Counter()
+    for row in data:
+        tweet_created = row.get("tweet_created", "")
+        tweet_date = tweet_created.split(" ")[0]
+        ano = tweet_date.split("-")[0]
+        contador_anos[ano] += 1
+    if ano_filtro.lower() == "all":
+        logging.info(f"Contagem de tweets por todos os anos: {dict(contador_anos)}")
+        return dict(contador_anos)
+    elif ano_filtro in contador_anos:
+        logging.info(f"Total de tweets no ano {ano_filtro}: {contador_anos[ano_filtro]}")
+        return {ano_filtro: contador_anos[ano_filtro]}
+    else:
+        logging.warning(f"O ano '{ano_filtro}' não foi encontrado nos dados.")
+        return {}
